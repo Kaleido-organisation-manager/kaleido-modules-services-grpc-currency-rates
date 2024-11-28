@@ -2,6 +2,7 @@ using Grpc.Core;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Services;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Create;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Delete;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Get;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Unit.Builders;
 using Moq;
 using Moq.AutoMock;
@@ -46,6 +47,21 @@ public class CurrencyRateServiceTests
 
         // Assert
         _mocker.GetMock<IDeleteHandler>()
+            .Verify(x => x.HandleAsync(request, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetCurrencyRate_CallsHandleAsyncOnGetHandler()
+    {
+        // Arrange
+        var request = new CurrencyRateRequestBuilder().Build();
+        var context = new Mock<ServerCallContext>().Object;
+
+        // Act
+        await _sut.GetCurrencyRate(request, context);
+
+        // Assert
+        _mocker.GetMock<IGetHandler>()
             .Verify(x => x.HandleAsync(request, It.IsAny<CancellationToken>()), Times.Once);
     }
 }
