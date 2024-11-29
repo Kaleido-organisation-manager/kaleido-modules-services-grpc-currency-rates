@@ -1,3 +1,4 @@
+using Kaleido.Common.Services.Grpc.Constants;
 using Kaleido.Common.Services.Grpc.Handlers.Interfaces;
 using Kaleido.Common.Services.Grpc.Models;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Models;
@@ -17,7 +18,10 @@ public class GetAllManager : IGetAllManager
 
     public async Task<IEnumerable<ManagerResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var result = await _entityLifecycleHandler.GetAllAsync(cancellationToken: cancellationToken);
+        var result = await _entityLifecycleHandler.FindAllAsync(
+            entity => true,
+            revision => revision.Status == RevisionStatus.Active && revision.Action != RevisionAction.Deleted,
+            cancellationToken: cancellationToken);
 
         return result.Select(x => ManagerResponse.Success(x));
     }
