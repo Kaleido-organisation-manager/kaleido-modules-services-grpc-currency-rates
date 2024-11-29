@@ -7,6 +7,8 @@ using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Mappers;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Models;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Services;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Validators;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Create;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Delete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,14 @@ builder.Services.AddEntityRepository<CurrencyRateEntity, CurrencyRateEntityDbCon
 builder.Services.AddRevisionRepository<BaseRevisionEntity, CurrencyRateRevisionDbContext>();
 
 builder.Services.AddLifeCycleHandler<CurrencyRateEntity, BaseRevisionEntity>();
+
+// Create
+builder.Services.AddScoped<ICreateHandler, CreateHandler>();
+builder.Services.AddScoped<ICreateManager, CreateManager>();
+
+// Delete
+builder.Services.AddScoped<IDeleteHandler, DeleteHandler>();
+builder.Services.AddScoped<IDeleteManager, DeleteManager>();
 
 // Add services to the container.
 builder.Services.AddGrpc();
