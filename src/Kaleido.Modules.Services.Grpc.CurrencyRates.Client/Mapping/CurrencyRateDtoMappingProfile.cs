@@ -26,5 +26,9 @@ public class CurrencyRateDtoMappingProfile : Profile
         // DateTime <-> Timestamp conversions
         CreateMap<Timestamp, DateTime>().ConvertUsing(src => src.ToDateTime());
         CreateMap<DateTime, Timestamp>().ConvertUsing(src => Timestamp.FromDateTime(src.ToUniversalTime()));
+
+        // Guid <-> string conversions
+        CreateMap<Guid, string>().ConvertUsing(src => src.ToString());
+        CreateMap<string, Guid>().ConvertUsing(src => Guid.Parse(src));
     }
 }

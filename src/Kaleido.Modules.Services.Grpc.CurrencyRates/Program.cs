@@ -9,6 +9,8 @@ using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Services;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Validators;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Create;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Delete;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Get;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAll;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllConversions;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllRevisions;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetConversion;
@@ -65,6 +67,14 @@ builder.Services.AddScoped<IGetConversionManager, GetConversionManager>();
 // Get Revision
 builder.Services.AddScoped<IGetRevisionHandler, GetRevisionHandler>();
 builder.Services.AddScoped<IGetRevisionManager, GetRevisionManager>();
+
+// Get
+builder.Services.AddScoped<IGetHandler, GetHandler>();
+builder.Services.AddScoped<IGetManager, GetManager>();
+
+// Get All
+builder.Services.AddScoped<IGetAllHandler, GetAllHandler>();
+builder.Services.AddScoped<IGetAllManager, GetAllManager>();
 
 // Add services to the container.
 builder.Services.AddGrpc();

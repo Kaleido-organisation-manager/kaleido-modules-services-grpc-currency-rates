@@ -3,6 +3,7 @@ using Kaleido.Grpc.CurrencyRates;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Create;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Delete;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Get;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAll;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllConversions;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllRevisions;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetConversion;
@@ -17,6 +18,7 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
     private readonly IDeleteHandler _deleteHandler;
     private readonly IUpdateHandler _updateHandler;
     private readonly IGetHandler _getHandler;
+    private readonly IGetAllHandler _getAllHandler;
     private readonly IGetAllConversionsHandler _getAllConversionsHandler;
     private readonly IGetAllRevisionsHandler _getAllRevisionsHandler;
     private readonly IGetConversionHandler _getConversionHandler;
@@ -27,6 +29,7 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
         IDeleteHandler deleteHandler,
         IUpdateHandler updateHandler,
         IGetHandler getHandler,
+        IGetAllHandler getAllHandler,
         IGetAllConversionsHandler getAllConversionsHandler,
         IGetAllRevisionsHandler getAllRevisionsHandler,
         IGetConversionHandler getConversionHandler,
@@ -36,6 +39,7 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
         _deleteHandler = deleteHandler;
         _updateHandler = updateHandler;
         _getHandler = getHandler;
+        _getAllHandler = getAllHandler;
         _getAllConversionsHandler = getAllConversionsHandler;
         _getAllRevisionsHandler = getAllRevisionsHandler;
         _getConversionHandler = getConversionHandler;
@@ -60,6 +64,11 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
     public override async Task<CurrencyRateResponse> GetCurrencyRate(CurrencyRateRequest request, ServerCallContext context)
     {
         return await _getHandler.HandleAsync(request, context.CancellationToken);
+    }
+
+    public override async Task<CurrencyRateListResponse> GetAllCurrencyRates(EmptyRequest request, ServerCallContext context)
+    {
+        return await _getAllHandler.HandleAsync(request, context.CancellationToken);
     }
 
     public override async Task<CurrencyRateListResponse> GetAllCurrencyConversions(CurrencyRateRequest request, ServerCallContext context)

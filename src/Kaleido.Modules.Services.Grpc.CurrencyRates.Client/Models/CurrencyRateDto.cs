@@ -8,7 +8,7 @@ public class CurrencyRateDto
     /// <summary>
     /// The unique identifier of the currency rate
     /// </summary>
-    public string Key { get; set; } = string.Empty;
+    public Guid Key { get; set; }
     /// <summary>
     /// The entity details of the currency rate
     /// </summary>

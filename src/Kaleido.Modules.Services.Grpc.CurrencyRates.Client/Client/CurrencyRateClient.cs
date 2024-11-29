@@ -42,7 +42,7 @@ public class CurrencyRateClient : ICurrencyRateClient
     public async Task<CurrencyRateDto> DeleteAsync(Guid originKey, Guid targetKey, CancellationToken cancellationToken = default)
     {
         var conversionResult = await GetConversionAsync(originKey, targetKey, cancellationToken);
-        return await DeleteAsync(Guid.Parse(conversionResult.Key), cancellationToken);
+        return await DeleteAsync(conversionResult.Key, cancellationToken);
     }
 
     public async Task<CurrencyRateDto> GetAsync(Guid key, CancellationToken cancellationToken = default)
@@ -50,6 +50,12 @@ public class CurrencyRateClient : ICurrencyRateClient
         var request = new CurrencyRateRequest { Key = key.ToString() };
         var response = await _client.GetCurrencyRateAsync(request, cancellationToken: cancellationToken);
         return _mapper.Map<CurrencyRateDto>(response);
+    }
+
+    public async Task<IEnumerable<CurrencyRateDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await _client.GetAllCurrencyRatesAsync(new EmptyRequest(), cancellationToken: cancellationToken);
+        return _mapper.Map<IEnumerable<CurrencyRateDto>>(response);
     }
 
     public async Task<IEnumerable<CurrencyRateDto>> GetAllConversionsAsync(Guid currencyKey, CancellationToken cancellationToken = default)
@@ -69,7 +75,7 @@ public class CurrencyRateClient : ICurrencyRateClient
     public async Task<IEnumerable<CurrencyRateDto>> GetAllRevisionsAsync(Guid originKey, Guid targetKey, CancellationToken cancellationToken = default)
     {
         var conversionResult = await GetConversionAsync(originKey, targetKey, cancellationToken);
-        return await GetAllRevisionsAsync(Guid.Parse(conversionResult.Key), cancellationToken);
+        return await GetAllRevisionsAsync(conversionResult.Key, cancellationToken);
     }
 
     public async Task<CurrencyRateDto> GetConversionAsync(Guid originKey, Guid targetKey, CancellationToken cancellationToken = default)
@@ -97,7 +103,7 @@ public class CurrencyRateClient : ICurrencyRateClient
     public async Task<CurrencyRateDto> GetRevisionAsync(Guid originKey, Guid targetKey, DateTime createdAt, CancellationToken cancellationToken = default)
     {
         var conversionResult = await GetConversionAsync(originKey, targetKey, cancellationToken);
-        return await GetRevisionAsync(Guid.Parse(conversionResult.Key), createdAt, cancellationToken);
+        return await GetRevisionAsync(conversionResult.Key, createdAt, cancellationToken);
     }
 
     public async Task<CurrencyRateDto> UpdateAsync(Guid originKey, Guid targetKey, decimal rate, CancellationToken cancellationToken = default)
@@ -105,7 +111,7 @@ public class CurrencyRateClient : ICurrencyRateClient
         var conversionResult = await GetConversionAsync(originKey, targetKey, cancellationToken);
         var request = new CurrencyRateActionRequest
         {
-            Key = conversionResult.Key,
+            Key = conversionResult.Key.ToString(),
             CurrencyRate = new CurrencyRate
             {
                 OriginKey = originKey.ToString(),

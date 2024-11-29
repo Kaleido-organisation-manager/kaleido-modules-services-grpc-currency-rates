@@ -62,6 +62,13 @@ public interface ICurrencyRateClient
     Task<CurrencyRateDto> GetAsync(Guid key, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets all currency rates
+    /// </summary>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>List of currency rate details</returns>
+    Task<IEnumerable<CurrencyRateDto>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets all currency conversions for a specific currency
     /// </summary>
     /// <param name="currencyKey">The key of the currency to get conversions for</param>

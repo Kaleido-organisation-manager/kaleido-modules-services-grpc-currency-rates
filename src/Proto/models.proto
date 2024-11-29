@@ -37,6 +37,8 @@ message CurrencyConversionRequest {
     string targetKey = 2;
 }
 
+message EmptyRequest {}
+
 message CurrencyRateResponse {
     string key = 1;
     CurrencyRate currencyRate = 2;
