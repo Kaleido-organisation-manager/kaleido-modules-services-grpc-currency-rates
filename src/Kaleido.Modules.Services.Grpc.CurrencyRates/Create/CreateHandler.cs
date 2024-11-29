@@ -32,7 +32,7 @@ public class CreateHandler : ICreateHandler
         {
             await _validator.ValidateAndThrowAsync(request);
             var currencyRate = _mapper.Map<CurrencyRateEntity>(request);
-            var managerResponse = await _createManager.CreateAsync(currencyRate);
+            var managerResponse = await _createManager.CreateAsync(currencyRate, cancellationToken);
             return _mapper.Map<CurrencyRateResponse>(managerResponse.CurrencyRate);
         }
         catch (ValidationException ex)

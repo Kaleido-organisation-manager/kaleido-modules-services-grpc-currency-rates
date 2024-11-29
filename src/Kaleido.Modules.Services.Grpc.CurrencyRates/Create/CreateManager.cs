@@ -1,3 +1,4 @@
+using Kaleido.Common.Services.Grpc.Constants;
 using Kaleido.Common.Services.Grpc.Handlers.Interfaces;
 using Kaleido.Common.Services.Grpc.Models;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Models;
@@ -13,9 +14,27 @@ public class CreateManager : ICreateManager
         _entityLifeCycleHandler = entityLifeCycleHandler;
     }
 
-    public async Task<ManagerResponse> CreateAsync(CurrencyRateEntity request)
+    public async Task<ManagerResponse> CreateAsync(CurrencyRateEntity request, CancellationToken cancellationToken = default)
     {
-        var entity = await _entityLifeCycleHandler.CreateAsync(request);
-        return ManagerResponse.Success(entity);
+        var entityExists = await _entityLifeCycleHandler.FindAsync(
+            entity => entity.OriginKey == request.OriginKey && entity.TargetKey == request.TargetKey,
+            revision => revision.Status == RevisionStatus.Active,
+            cancellationToken: cancellationToken
+        );
+
+        if (entityExists.Any() && entityExists.FirstOrDefault()?.Revision.Action != RevisionAction.Deleted)
+        {
+            throw new InvalidOperationException("Entity already exists");
+        }
+        else if (entityExists.Any() && entityExists.FirstOrDefault()?.Revision.Action == RevisionAction.Deleted)
+        {
+            var result = await _entityLifeCycleHandler.RestoreAsync(entityExists.FirstOrDefault()?.Key ?? Guid.Empty);
+            return ManagerResponse.Success(result);
+        }
+        else
+        {
+            var entity = await _entityLifeCycleHandler.CreateAsync(request);
+            return ManagerResponse.Success(entity);
+        }
     }
 }

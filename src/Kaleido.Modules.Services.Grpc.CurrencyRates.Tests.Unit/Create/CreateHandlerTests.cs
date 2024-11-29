@@ -32,8 +32,8 @@ public class CreateHandlerTests
         _mocker.Use(mapper.CreateMapper());
 
         _mocker.GetMock<ICreateManager>()
-            .Setup(m => m.CreateAsync(It.IsAny<CurrencyRateEntity>()))
-            .ReturnsAsync((CurrencyRateEntity entity) => ManagerResponse.Success(
+            .Setup(m => m.CreateAsync(It.IsAny<CurrencyRateEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((CurrencyRateEntity entity, CancellationToken cancellationToken) => ManagerResponse.Success(
                 new EntityLifeCycleResult<CurrencyRateEntity, BaseRevisionEntity>
                 {
                     Entity = entity,
@@ -71,7 +71,7 @@ public class CreateHandlerTests
 
         // Assert
         _mocker.GetMock<ICreateManager>()
-            .Verify(m => m.CreateAsync(It.IsAny<CurrencyRateEntity>()), Times.Once);
+            .Verify(m => m.CreateAsync(It.IsAny<CurrencyRateEntity>(), CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class CreateHandlerTests
         // Arrange
         var request = new CurrencyRateBuilder().Build();
         _mocker.GetMock<ICreateManager>()
-            .Setup(m => m.CreateAsync(It.IsAny<CurrencyRateEntity>()))
+            .Setup(m => m.CreateAsync(It.IsAny<CurrencyRateEntity>(), CancellationToken.None))
             .ThrowsAsync(new Exception("Test exception"));
 
         // Act & Assert
