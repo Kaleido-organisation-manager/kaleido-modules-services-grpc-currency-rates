@@ -23,7 +23,8 @@ public class GetConversionManager : IGetConversionManager
         {
             var result = await _entityLifecycleHandler.FindAsync(
                 entity => entity.OriginKey == originKey && entity.TargetKey == targetKey,
-                revision => revision.Action != RevisionAction.Deleted && revision.Status == RevisionStatus.Active
+                revision => revision.Action != RevisionAction.Deleted && revision.Status == RevisionStatus.Active,
+                cancellationToken: cancellationToken
             );
 
             var resolvedEntity = result.SingleOrDefault();

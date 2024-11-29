@@ -28,12 +28,15 @@ public class CreateManager : ICreateManager
         }
         else if (entityExists.Any() && entityExists.FirstOrDefault()?.Revision.Action == RevisionAction.Deleted)
         {
-            var result = await _entityLifeCycleHandler.RestoreAsync(entityExists.FirstOrDefault()?.Key ?? Guid.Empty);
+            var result = await _entityLifeCycleHandler.RestoreAsync(
+                entityExists.FirstOrDefault()?.Key ?? Guid.Empty,
+                cancellationToken: cancellationToken
+            );
             return ManagerResponse.Success(result);
         }
         else
         {
-            var entity = await _entityLifeCycleHandler.CreateAsync(request);
+            var entity = await _entityLifeCycleHandler.CreateAsync(request, cancellationToken: cancellationToken);
             return ManagerResponse.Success(entity);
         }
     }
