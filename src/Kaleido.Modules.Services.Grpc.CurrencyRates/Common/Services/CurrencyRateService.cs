@@ -3,6 +3,7 @@ using Kaleido.Grpc.CurrencyRates;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Create;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Delete;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllConversions;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllRevisions;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Update;
 
 namespace Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Services;
@@ -13,17 +14,20 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
     private readonly IDeleteHandler _deleteHandler;
     private readonly IUpdateHandler _updateHandler;
     private readonly IGetAllConversionsHandler _getAllConversionsHandler;
+    private readonly IGetAllRevisionsHandler _getAllRevisionsHandler;
 
     public CurrencyRateService(
         ICreateHandler createHandler,
         IDeleteHandler deleteHandler,
         IUpdateHandler updateHandler,
-        IGetAllConversionsHandler getAllConversionsHandler)
+        IGetAllConversionsHandler getAllConversionsHandler,
+        IGetAllRevisionsHandler getAllRevisionsHandler)
     {
         _createHandler = createHandler;
         _deleteHandler = deleteHandler;
         _updateHandler = updateHandler;
         _getAllConversionsHandler = getAllConversionsHandler;
+        _getAllRevisionsHandler = getAllRevisionsHandler;
     }
 
     public override async Task<CurrencyRateResponse> CreateCurrencyRate(CurrencyRate request, ServerCallContext context)
@@ -44,5 +48,10 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
     public override async Task<CurrencyRateListResponse> GetAllCurrencyConversions(CurrencyRateRequest request, ServerCallContext context)
     {
         return await _getAllConversionsHandler.HandleAsync(request, context.CancellationToken);
+    }
+
+    public override async Task<CurrencyRateListResponse> GetAllCurrencyRateRevisions(CurrencyRateRequest request, ServerCallContext context)
+    {
+        return await _getAllRevisionsHandler.HandleAsync(request, context.CancellationToken);
     }
 }
