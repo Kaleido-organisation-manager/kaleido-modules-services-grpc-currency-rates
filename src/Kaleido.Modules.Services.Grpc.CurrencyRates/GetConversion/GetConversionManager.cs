@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Kaleido.Common.Services.Grpc.Constants;
 using Kaleido.Common.Services.Grpc.Exceptions;
 using Kaleido.Common.Services.Grpc.Handlers.Interfaces;
@@ -9,12 +10,15 @@ namespace Kaleido.Modules.Services.Grpc.CurrencyRates.GetConversion;
 public class GetConversionManager : IGetConversionManager
 {
     private readonly IEntityLifecycleHandler<CurrencyRateEntity, BaseRevisionEntity> _entityLifecycleHandler;
+    private readonly ILogger<GetConversionManager> _logger;
 
     public GetConversionManager(
-        IEntityLifecycleHandler<CurrencyRateEntity, BaseRevisionEntity> entityLifecycleHandler
-        )
+        IEntityLifecycleHandler<CurrencyRateEntity, BaseRevisionEntity> entityLifecycleHandler,
+        ILogger<GetConversionManager> logger
+    )
     {
         _entityLifecycleHandler = entityLifecycleHandler;
+        _logger = logger;
     }
 
     public async Task<ManagerResponse> GetConversionAsync(Guid originKey, Guid targetKey, CancellationToken cancellationToken)

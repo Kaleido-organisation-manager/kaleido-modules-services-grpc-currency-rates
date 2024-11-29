@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Kaleido.Common.Services.Grpc.Constants;
 using Kaleido.Common.Services.Grpc.Handlers.Interfaces;
 using Kaleido.Common.Services.Grpc.Models;
@@ -35,7 +36,12 @@ public class GetAllManagerTests
         };
 
         _mocker.GetMock<IEntityLifecycleHandler<CurrencyRateEntity, BaseRevisionEntity>>()
-            .Setup(h => h.GetAllAsync(It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .Setup(h => h.FindAllAsync(
+                It.IsAny<Expression<Func<CurrencyRateEntity, bool>>>(),
+                It.IsAny<Expression<Func<BaseRevisionEntity, bool>>>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<CancellationToken>()
+            ))
             .ReturnsAsync(_entityResults);
 
         _sut = _mocker.CreateInstance<GetAllManager>();
@@ -49,7 +55,12 @@ public class GetAllManagerTests
 
         // Assert
         _mocker.GetMock<IEntityLifecycleHandler<CurrencyRateEntity, BaseRevisionEntity>>()
-            .Verify(h => h.GetAllAsync(It.IsAny<Guid?>(), It.IsAny<CancellationToken>()), Times.Once);
+            .Verify(h => h.FindAllAsync(
+                It.IsAny<Expression<Func<CurrencyRateEntity, bool>>>(),
+                It.IsAny<Expression<Func<BaseRevisionEntity, bool>>>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<CancellationToken>()
+            ), Times.Once);
     }
 
     [Fact]
@@ -70,7 +81,12 @@ public class GetAllManagerTests
     {
         // Arrange
         _mocker.GetMock<IEntityLifecycleHandler<CurrencyRateEntity, BaseRevisionEntity>>()
-            .Setup(h => h.GetAllAsync(It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .Setup(h => h.FindAllAsync(
+                It.IsAny<Expression<Func<CurrencyRateEntity, bool>>>(),
+                It.IsAny<Expression<Func<BaseRevisionEntity, bool>>>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<CancellationToken>()
+            ))
             .ReturnsAsync(new List<EntityLifeCycleResult<CurrencyRateEntity, BaseRevisionEntity>>());
 
         // Act
@@ -93,7 +109,12 @@ public class GetAllManagerTests
         };
 
         _mocker.GetMock<IEntityLifecycleHandler<CurrencyRateEntity, BaseRevisionEntity>>()
-            .Setup(h => h.GetAllAsync(It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .Setup(h => h.FindAllAsync(
+                It.IsAny<Expression<Func<CurrencyRateEntity, bool>>>(),
+                It.IsAny<Expression<Func<BaseRevisionEntity, bool>>>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<CancellationToken>()
+            ))
             .ReturnsAsync(multipleResults);
 
         // Act

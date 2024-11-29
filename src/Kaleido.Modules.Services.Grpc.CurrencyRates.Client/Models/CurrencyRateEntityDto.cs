@@ -5,10 +5,6 @@ namespace Kaleido.Modules.Services.Grpc.CurrencyRates.Client.Models;
 /// </summary>
 public class CurrencyRateEntityDto
 {
-    /// <summary>
-    /// The unique identifier of the currency rate
-    /// </summary>
-    public Guid Key { get; set; }
 
     /// <summary>
     /// The key of the origin currency

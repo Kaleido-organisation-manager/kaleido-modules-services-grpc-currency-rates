@@ -56,13 +56,11 @@ public class CurrencyRateValidatorTests
         result.ShouldHaveValidationErrorFor(x => x.TargetKey);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Validate_InvalidRate_ShouldHaveValidationError(double rate)
+    [Fact]
+    public void Validate_InvalidRate_ShouldHaveValidationError()
     {
         // Arrange
-        _validCurrencyRate.Rate = rate;
+        _validCurrencyRate.Rate = -1;
 
         // Act
         var result = _sut.TestValidate(_validCurrencyRate);

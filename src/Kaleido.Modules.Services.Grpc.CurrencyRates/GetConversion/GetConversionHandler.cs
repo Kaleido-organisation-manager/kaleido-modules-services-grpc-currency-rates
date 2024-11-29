@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AutoMapper;
 using FluentValidation;
 using Grpc.Core;
@@ -30,6 +31,7 @@ public class GetConversionHandler : IGetConversionHandler
 
     public async Task<CurrencyRateResponse> HandleAsync(CurrencyConversionRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("request: {request}", JsonSerializer.Serialize(request, new JsonSerializerOptions { WriteIndented = true }));
         ManagerResponse? result;
         try
         {
@@ -39,6 +41,7 @@ public class GetConversionHandler : IGetConversionHandler
             var targetKey = Guid.Parse(request.TargetKey);
 
             result = await _getConversionManager.GetConversionAsync(originKey, targetKey, cancellationToken);
+            _logger.LogInformation("result: {result}", JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
         }
         catch (ValidationException e)
         {

@@ -18,7 +18,7 @@ namespace Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Integrations.Fixture
 public class InfrastructureFixture : IDisposable
 {
     private const int TIMEOUT_WAIT_MINUTES = 1;
-    private const string DB_NAME = "categories";
+    private const string DB_NAME = "integrationTests";
     private const string DB_USER = "postgres";
     private const string DB_PASSWORD = "postgres";
 
