@@ -9,6 +9,7 @@ service GrpcCurrencyRateService {
     rpc CreateCurrencyRate(CurrencyRate) returns (CurrencyRateResponse);
     rpc UpdateCurrencyRate(CurrencyRateActionRequest) returns (CurrencyRateResponse);
     rpc DeleteCurrencyRate(CurrencyRateRequest) returns (CurrencyRateResponse);
+    rpc GetCurrencyRate(CurrencyRateRequest) returns (CurrencyRateResponse);
 
     // Revisions
     rpc GetCurrencyRateRevision(CurrencyRateRevisionRequest) returns (CurrencyRateResponse);
