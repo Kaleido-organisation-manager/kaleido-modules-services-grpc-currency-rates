@@ -16,12 +16,12 @@ public class CurrencyRateMappingProfileTests
 
     public CurrencyRateMappingProfileTests()
     {
-        var configuration = new MapperConfiguration(cfg =>
+        var mapperConfiguration = new MapperConfiguration(cfg =>
         {
             cfg.AddProfile<CurrencyRateMappingProfile>();
         });
-
-        _mapper = configuration.CreateMapper();
+        mapperConfiguration.AssertConfigurationIsValid();
+        _mapper = mapperConfiguration.CreateMapper();
     }
 
     [Fact]

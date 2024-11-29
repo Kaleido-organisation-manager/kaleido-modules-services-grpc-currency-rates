@@ -1,4 +1,5 @@
 using AutoMapper;
+using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Kaleido.Grpc.CurrencyRates;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Client.Models;
@@ -21,7 +22,9 @@ public class CurrencyRateDtoMappingProfile : Profile
         CreateMap<BaseRevision, CurrencyRateRevisionDto>();
 
         CreateMap<CurrencyRateListResponse, IEnumerable<CurrencyRateDto>>()
-            .ForMember(dest => dest, opt => opt.MapFrom(src => src.CurrencyRates));
+           .ConvertUsing((src, dest, context) =>
+               src.CurrencyRates.Select(rate => context.Mapper.Map<CurrencyRateDto>(rate)));
+
 
         // DateTime <-> Timestamp conversions
         CreateMap<Timestamp, DateTime>().ConvertUsing(src => src.ToDateTime());

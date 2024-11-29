@@ -9,6 +9,7 @@ public class CurrencyRateValidator : AbstractValidator<CurrencyRate>
     {
         RuleFor(x => x.OriginKey).SetValidator(new KeyValidator());
         RuleFor(x => x.TargetKey).SetValidator(new KeyValidator());
-        RuleFor(x => x.Rate).NotNull().NotEmpty().GreaterThan(0);
+        RuleFor(x => x).Must(x => x.OriginKey != x.TargetKey).WithMessage("Origin key cannot be equal to target key.");
+        RuleFor(x => x.Rate).NotNull().GreaterThanOrEqualTo(0);
     }
 }

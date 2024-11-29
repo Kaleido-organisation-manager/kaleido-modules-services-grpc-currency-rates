@@ -175,7 +175,7 @@ public class InfrastructureFixture : IDisposable
 }
 
 
-[CollectionDefinition("Infrastructure collection")]
+[CollectionDefinition(nameof(InfrastructureCollection))]
 public class InfrastructureCollection : ICollectionFixture<InfrastructureFixture>
 {
     // This class has no code, and is never created. Its purpose is simply

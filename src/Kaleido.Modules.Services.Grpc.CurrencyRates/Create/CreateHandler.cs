@@ -40,6 +40,11 @@ public class CreateHandler : ICreateHandler
             _logger.LogError(ex, "Validation failed");
             throw new RpcException(new Status(StatusCode.InvalidArgument, ex.Message, ex));
         }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Error creating currency rate");
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ex.Message, ex));
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating currency rate");
