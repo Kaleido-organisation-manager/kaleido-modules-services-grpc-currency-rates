@@ -9,6 +9,7 @@ using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Services;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Validators;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Create;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Delete;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Update;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,10 @@ builder.Services.AddScoped<ICreateManager, CreateManager>();
 // Delete
 builder.Services.AddScoped<IDeleteHandler, DeleteHandler>();
 builder.Services.AddScoped<IDeleteManager, DeleteManager>();
+
+// Update
+builder.Services.AddScoped<IUpdateHandler, UpdateHandler>();
+builder.Services.AddScoped<IUpdateManager, UpdateManager>();
 
 // Add services to the container.
 builder.Services.AddGrpc();

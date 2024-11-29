@@ -28,4 +28,9 @@ public readonly struct ManagerResponse
     {
         return new ManagerResponse(ManagerResponseState.NotFound);
     }
+
+    public static ManagerResponse NotModified()
+    {
+        return new ManagerResponse(ManagerResponseState.NotModified);
+    }
 }

@@ -4,9 +4,6 @@ package Kaleido.Grpc.CurrencyRates;
 
 import "google/protobuf/timestamp.proto";
 
-
-message EmptyRequest {}
-
 message BaseRevision {
     string key = 1;
     int32 revision = 2;
