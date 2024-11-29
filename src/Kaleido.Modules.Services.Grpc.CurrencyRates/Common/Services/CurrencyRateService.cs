@@ -4,6 +4,7 @@ using Kaleido.Modules.Services.Grpc.CurrencyRates.Create;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Delete;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllConversions;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.GetAllRevisions;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.GetConversion;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Update;
 
 namespace Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Services;
@@ -15,19 +16,22 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
     private readonly IUpdateHandler _updateHandler;
     private readonly IGetAllConversionsHandler _getAllConversionsHandler;
     private readonly IGetAllRevisionsHandler _getAllRevisionsHandler;
+    private readonly IGetConversionHandler _getConversionHandler;
 
     public CurrencyRateService(
         ICreateHandler createHandler,
         IDeleteHandler deleteHandler,
         IUpdateHandler updateHandler,
         IGetAllConversionsHandler getAllConversionsHandler,
-        IGetAllRevisionsHandler getAllRevisionsHandler)
+        IGetAllRevisionsHandler getAllRevisionsHandler,
+        IGetConversionHandler getConversionHandler)
     {
         _createHandler = createHandler;
         _deleteHandler = deleteHandler;
         _updateHandler = updateHandler;
         _getAllConversionsHandler = getAllConversionsHandler;
         _getAllRevisionsHandler = getAllRevisionsHandler;
+        _getConversionHandler = getConversionHandler;
     }
 
     public override async Task<CurrencyRateResponse> CreateCurrencyRate(CurrencyRate request, ServerCallContext context)
@@ -53,5 +57,10 @@ public class CurrencyRateService : GrpcCurrencyRateService.GrpcCurrencyRateServi
     public override async Task<CurrencyRateListResponse> GetAllCurrencyRateRevisions(CurrencyRateRequest request, ServerCallContext context)
     {
         return await _getAllRevisionsHandler.HandleAsync(request, context.CancellationToken);
+    }
+
+    public override async Task<CurrencyRateResponse> GetCurrencyConversion(CurrencyConversionRequest request, ServerCallContext context)
+    {
+        return await _getConversionHandler.HandleAsync(request, context.CancellationToken);
     }
 }
