@@ -26,6 +26,9 @@ public class CurrencyRateMappingProfile : Profile
             .ForMember(dest => dest.CurrencyRate, opt => opt.MapFrom(src => src.Entity))
             .ForMember(dest => dest.Revision, opt => opt.MapFrom(src => src.Revision));
 
+        CreateMap<IEnumerable<EntityLifeCycleResult<CurrencyRateEntity, BaseRevisionEntity>>, CurrencyRateListResponse>()
+            .ForMember(c => c.CurrencyRates, opt => opt.MapFrom(c => c));
+
         // Revision mappings
         CreateMap<BaseRevisionEntity, BaseRevision>();
 

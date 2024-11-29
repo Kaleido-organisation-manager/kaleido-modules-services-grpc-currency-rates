@@ -44,6 +44,6 @@ message CurrencyRateResponse {
 }
 
 message CurrencyRateListResponse {
-    repeated CurrencyRate currencyRates = 1;
+    repeated CurrencyRateResponse currencyRates = 1;
 }
 
