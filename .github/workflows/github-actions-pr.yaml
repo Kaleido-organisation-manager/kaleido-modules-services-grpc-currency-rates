@@ -1,0 +1,179 @@
+name: CI Pipeline on Pull Request
+
+'on': pull_request
+
+jobs:
+  gitversion:
+    name: GitVersion
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.Semver.outputs.MajorMinorPatch }}
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+        with:
+          fetch-depth: 0
+      - uses: gittools/actions/gitversion/setup@v3.0.0
+      - id: Semver
+        uses: gittools/actions/gitversion/execute@v3.0.0
+
+  build-currencyrates-service:
+    name: Build CurrencyRates Service
+    needs: gitversion
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+      - name: Add Github nugetfeed
+        run: dotnet nuget add source --username DriesDelanghe --password ${{ secrets.NUGET_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Kaleido-organisation-manager/index.json"
+      - name: Restore dependencies of currencyrates service
+        run: dotnet restore 
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates
+      - name: Build currencyrates service
+        run: dotnet build
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates
+
+  build-currencyrates-service-migrations:
+    name: Build CurrencyRates Service Migrations
+    needs: gitversion
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+      - name: Add Github nugetfeed
+        run: dotnet nuget add source --username DriesDelanghe --password ${{ secrets.NUGET_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Kaleido-organisation-manager/index.json"
+      - name: Restore dependencies of currencyrates service migrations
+        run: dotnet restore
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Migrations
+      - name: Build currencyrates service migrations
+        run: dotnet build
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Migrations
+
+  build-currencyrates-service-client:
+    name: Build CurrencyRates Service Client
+    needs: gitversion
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+      - name: Add Github nugetfeed
+        run: dotnet nuget add source --username DriesDelanghe --password ${{ secrets.NUGET_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Kaleido-organisation-manager/index.json"
+      - name: Restore dependencies of currencyrates service client
+        run: dotnet restore
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Client
+      - name: Build currencyrates service client
+        run: dotnet build
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Client
+
+  unit-tests:
+    name: Run Unit Tests
+    needs: [build-currencyrates-service, build-currencyrates-service-migrations, build-currencyrates-service-client]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+      - name: Add Github nugetfeed
+        run: dotnet nuget add source --username DriesDelanghe --password ${{ secrets.NUGET_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Kaleido-organisation-manager/index.json"
+      - name: Restore dependencies of unit tests
+        run: dotnet restore
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Unit
+      - name: Run unit tests
+        run: dotnet test
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Unit
+
+  create-service-release:
+    name: Create Dotnet Release for service
+    needs: [build-currencyrates-service, build-currencyrates-service-migrations, build-currencyrates-service-client, gitversion]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+      - name: Add Github nugetfeed
+        run: dotnet nuget add source --username DriesDelanghe --password ${{ secrets.NUGET_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Kaleido-organisation-manager/index.json"
+      - name: Restore dependencies of service
+        run: dotnet restore
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates
+      - name: Build service Release
+        run: dotnet build -c Release
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates
+      - name: Upload Dotnet Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: currencyrates-service
+          path: src/Kaleido.Modules.Services.Grpc.CurrencyRates/bin/Release/net8.0
+
+  create-migrations-release:
+    name: Create Dotnet Release for migrations
+    needs: [build-currencyrates-service, build-currencyrates-service-migrations, build-currencyrates-service-client, gitversion]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+      - name: Add Github nugetfeed
+        run: dotnet nuget add source --username DriesDelanghe --password ${{ secrets.NUGET_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Kaleido-organisation-manager/index.json"
+      - name: Restore dependencies of migrations
+        run: dotnet restore
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Migrations
+      - name: Build migrations
+        run: dotnet build -c Release
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Migrations
+      - name: Upload Dotnet Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: currencyrates-service-migrations
+          path: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Migrations/bin/Release/net8.0
+
+  integration-tests:
+    name: Run Integration Tests
+    needs: [create-service-release, create-migrations-release, gitversion]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Repository
+      - name: Add Github nugetfeed
+        run: dotnet nuget add source --username DriesDelanghe --password ${{ secrets.NUGET_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Kaleido-organisation-manager/index.json"
+      - name: Restore dependencies of integration tests
+        run: dotnet restore
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Integrations
+      - name: Download Service Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: currencyrates-service
+          path: service/out
+      - name: Download Migrations Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: currencyrates-service-migrations
+          path: migrations/out
+      - name: Build CurrencyRates Service Docker Image
+        run: docker build . -f dockerfiles/Grpc.CurrencyRates/Dockerfile.cicd -t kaleido-modules-services-grpc-currencyrates:${{ needs.gitversion.outputs.version }} --build-arg RELEASE_DIR=service/out
+      - name: Build CurrencyRates Migrations Docker Image
+        run: docker build . -f dockerfiles/Grpc.CurrencyRates.Migrations/Dockerfile.cicd -t kaleido-modules-services-grpc-currencyrates-migrations:${{ needs.gitversion.outputs.version }} --build-arg RELEASE_DIR=migrations/out
+      - name: Run integration tests
+        run: dotnet test
+        working-directory: src/Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Integrations
+        env:
+          CURRENCY_RATES_IMAGE_NAME: kaleido-modules-services-grpc-currencyrates:${{ needs.gitversion.outputs.version }}
+          MIGRATIONS_IMAGE_NAME: kaleido-modules-services-grpc-currencyrates-migrations:${{ needs.gitversion.outputs.version }}
+          CI: true
