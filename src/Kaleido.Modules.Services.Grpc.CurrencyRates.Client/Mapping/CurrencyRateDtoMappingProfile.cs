@@ -19,6 +19,14 @@ public class CurrencyRateDtoMappingProfile : Profile
             .ForMember(dest => dest.Rate, opt => opt.MapFrom(src =>
                 Math.Round((decimal)src.Rate, 2, MidpointRounding.AwayFromZero)));
 
+        CreateMap<CurrencyRateEntityDto, CurrencyRate>()
+            .ForMember(dest => dest.Rate, opt => opt.MapFrom(src =>
+                Math.Round(src.Rate, 2, MidpointRounding.AwayFromZero)));
+
+        CreateMap<CurrencyRateEntityDto, CurrencyRateActionRequest>()
+            .ForMember(dest => dest.CurrencyRate, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.Key, opt => opt.Ignore());
+
         CreateMap<BaseRevision, CurrencyRateRevisionDto>();
 
         CreateMap<CurrencyRateListResponse, IEnumerable<CurrencyRateDto>>()

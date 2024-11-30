@@ -32,6 +32,13 @@ public class CurrencyRateClient : ICurrencyRateClient
         return _mapper.Map<CurrencyRateDto>(response);
     }
 
+    public async Task<CurrencyRateDto> CreateAsync(CurrencyRateEntityDto currencyRate, CancellationToken cancellationToken = default)
+    {
+        var request = _mapper.Map<CurrencyRate>(currencyRate);
+        var response = await _client.CreateCurrencyRateAsync(request, cancellationToken: cancellationToken);
+        return _mapper.Map<CurrencyRateDto>(response);
+    }
+
     public async Task<CurrencyRateDto> DeleteAsync(Guid key, CancellationToken cancellationToken = default)
     {
         var request = new CurrencyRateRequest { Key = key.ToString() };
@@ -109,16 +116,10 @@ public class CurrencyRateClient : ICurrencyRateClient
     public async Task<CurrencyRateDto> UpdateAsync(Guid originKey, Guid targetKey, decimal rate, CancellationToken cancellationToken = default)
     {
         var conversionResult = await GetConversionAsync(originKey, targetKey, cancellationToken);
-        var request = new CurrencyRateActionRequest
-        {
-            Key = conversionResult.Key.ToString(),
-            CurrencyRate = new CurrencyRate
-            {
-                OriginKey = originKey.ToString(),
-                TargetKey = targetKey.ToString(),
-                Rate = (double)rate
-            }
-        };
+        var request = _mapper.Map<CurrencyRateActionRequest>(conversionResult.Entity);
+        request.Key = conversionResult.Key.ToString();
+        request.CurrencyRate.Rate = (double)rate;
+
         var response = await _client.UpdateCurrencyRateAsync(request, cancellationToken: cancellationToken);
         return _mapper.Map<CurrencyRateDto>(response);
     }
@@ -126,16 +127,27 @@ public class CurrencyRateClient : ICurrencyRateClient
     public async Task<CurrencyRateDto> UpdateAsync(Guid key, decimal rate, CancellationToken cancellationToken = default)
     {
         var currencyRate = await GetAsync(key, cancellationToken);
-        var request = new CurrencyRateActionRequest
-        {
-            Key = key.ToString(),
-            CurrencyRate = new CurrencyRate
-            {
-                OriginKey = currencyRate.Entity.OriginKey.ToString(),
-                TargetKey = currencyRate.Entity.TargetKey.ToString(),
-                Rate = (double)rate
-            }
-        };
+        var request = _mapper.Map<CurrencyRateActionRequest>(currencyRate.Entity);
+        request.Key = key.ToString();
+        request.CurrencyRate.Rate = (double)rate;
+
+        var response = await _client.UpdateCurrencyRateAsync(request, cancellationToken: cancellationToken);
+        return _mapper.Map<CurrencyRateDto>(response);
+    }
+
+    public async Task<CurrencyRateDto> UpdateAsync(Guid key, CurrencyRateEntityDto currencyRate, CancellationToken cancellationToken = default)
+    {
+        var request = _mapper.Map<CurrencyRateActionRequest>(currencyRate);
+        request.Key = key.ToString();
+        var response = await _client.UpdateCurrencyRateAsync(request, cancellationToken: cancellationToken);
+        return _mapper.Map<CurrencyRateDto>(response);
+    }
+
+    public async Task<CurrencyRateDto> UpdateAsync(CurrencyRateEntityDto currencyRate, CancellationToken cancellationToken = default)
+    {
+        var conversionResult = await GetConversionAsync(currencyRate.OriginKey, currencyRate.TargetKey, cancellationToken);
+        var request = _mapper.Map<CurrencyRateActionRequest>(currencyRate);
+        request.Key = conversionResult.Key.ToString();
         var response = await _client.UpdateCurrencyRateAsync(request, cancellationToken: cancellationToken);
         return _mapper.Map<CurrencyRateDto>(response);
     }

@@ -18,6 +18,14 @@ public interface ICurrencyRateClient
     Task<CurrencyRateDto> CreateAsync(Guid originKey, Guid targetKey, decimal rate, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Creates a new currency rate using a CurrencyRate object
+    /// </summary>
+    /// <param name="currencyRate">The CurrencyRate object to create</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>The created currency rate details</returns>
+    Task<CurrencyRateDto> CreateAsync(CurrencyRateEntityDto currencyRate, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Updates an existing currency rate
     /// </summary>
     /// <param name="originKey">The new origin currency key</param>
@@ -26,6 +34,23 @@ public interface ICurrencyRateClient
     /// <param name="cancellationToken">Optional cancellation token</param>
     /// <returns>The updated currency rate details</returns>
     Task<CurrencyRateDto> UpdateAsync(Guid originKey, Guid targetKey, decimal rate, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing currency rate using a CurrencyRate object
+    /// </summary>
+    /// <param name="key">The key of the currency rate to update</param>
+    /// <param name="currencyRate">The CurrencyRate object to update</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>The updated currency rate details</returns>
+    Task<CurrencyRateDto> UpdateAsync(Guid key, CurrencyRateEntityDto currencyRate, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing currency rate using a CurrencyRate object
+    /// </summary>
+    /// <param name="currencyRate">The CurrencyRate object to update</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>The updated currency rate details</returns>
+    Task<CurrencyRateDto> UpdateAsync(CurrencyRateEntityDto currencyRate, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates an existing currency rate

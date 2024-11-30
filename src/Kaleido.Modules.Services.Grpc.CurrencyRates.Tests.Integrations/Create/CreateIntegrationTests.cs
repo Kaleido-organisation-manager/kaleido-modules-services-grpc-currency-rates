@@ -1,6 +1,7 @@
 using Grpc.Core;
 using Kaleido.Common.Services.Grpc.Constants;
 using Kaleido.Common.Services.Grpc.Models;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Client.Models;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Integrations.Fixtures;
 using Xunit;
 
@@ -174,6 +175,69 @@ public class CreateIntegrationTests : IAsyncLifetime
         var exception = await Assert.ThrowsAsync<RpcException>(
             () => _fixture.Client.CreateAsync(key, key, rate));
 
+        Assert.Equal(StatusCode.InvalidArgument, exception.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateCurrencyRate_UsingEntityDto_CreatesNewRate()
+    {
+        // Arrange
+        var originKey = Guid.NewGuid();
+        var targetKey = Guid.NewGuid();
+        var rate = 1.5m;
+
+        var createDto = new CurrencyRateEntityDto
+        {
+            OriginKey = originKey,
+            TargetKey = targetKey,
+            Rate = rate
+        };
+
+        // Act
+        var result = await _fixture.Client.CreateAsync(createDto);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEqual(Guid.Empty, result.Key);
+        Assert.Equal(originKey, result.Entity.OriginKey);
+        Assert.Equal(targetKey, result.Entity.TargetKey);
+        Assert.Equal(rate, result.Entity.Rate);
+        Assert.Equal(RevisionAction.Created, result.Revision.Action);
+        Assert.Equal(RevisionStatus.Active, result.Revision.Status);
+    }
+
+    [Fact]
+    public async Task CreateCurrencyRate_UsingEntityDtoWithInvalidRate_ThrowsException()
+    {
+        // Arrange
+        var createDto = new CurrencyRateEntityDto
+        {
+            OriginKey = Guid.NewGuid(),
+            TargetKey = Guid.NewGuid(),
+            Rate = -1
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<RpcException>(
+            () => _fixture.Client.CreateAsync(createDto));
+        Assert.Equal(StatusCode.InvalidArgument, exception.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateCurrencyRate_UsingEntityDtoWithSameKeys_ThrowsException()
+    {
+        // Arrange
+        var key = Guid.NewGuid();
+        var createDto = new CurrencyRateEntityDto
+        {
+            OriginKey = key,
+            TargetKey = key,
+            Rate = 1.5m
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<RpcException>(
+            () => _fixture.Client.CreateAsync(createDto));
         Assert.Equal(StatusCode.InvalidArgument, exception.StatusCode);
     }
 }

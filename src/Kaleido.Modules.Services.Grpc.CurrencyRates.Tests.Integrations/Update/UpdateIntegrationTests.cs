@@ -1,6 +1,7 @@
 using Grpc.Core;
 using Kaleido.Common.Services.Grpc.Constants;
 using Kaleido.Common.Services.Grpc.Models;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Client.Models;
 using Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Integrations.Fixtures;
 using Xunit;
 
@@ -171,5 +172,120 @@ public class UpdateIntegrationTests : IAsyncLifetime
         // Assert
         Assert.Equal(updatedRate, result.Entity.Rate);
         Assert.Equal(RevisionAction.Updated, result.Revision.Action);
+    }
+
+    [Fact]
+    public async Task UpdateCurrencyRate_UsingEntityDto_UpdatesRate()
+    {
+        // Arrange
+        var originKey = Guid.NewGuid();
+        var targetKey = Guid.NewGuid();
+        var initialRate = 1.5m;
+        var updatedRate = 2.0m;
+
+        var created = await _fixture.Client.CreateAsync(originKey, targetKey, initialRate);
+
+        var updateDto = new CurrencyRateEntityDto
+        {
+            OriginKey = originKey,
+            TargetKey = targetKey,
+            Rate = updatedRate
+        };
+
+        // Act
+        var result = await _fixture.Client.UpdateAsync(created.Key, updateDto);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(created.Key, result.Key);
+        Assert.Equal(updatedRate, result.Entity.Rate);
+        Assert.Equal(RevisionAction.Updated, result.Revision.Action);
+    }
+
+    [Fact]
+    public async Task UpdateCurrencyRate_UsingEntityDtoWithoutKey_UpdatesRate()
+    {
+        // Arrange
+        var originKey = Guid.NewGuid();
+        var targetKey = Guid.NewGuid();
+        var initialRate = 1.5m;
+        var updatedRate = 2.0m;
+
+        await _fixture.Client.CreateAsync(originKey, targetKey, initialRate);
+
+        var updateDto = new CurrencyRateEntityDto
+        {
+            OriginKey = originKey,
+            TargetKey = targetKey,
+            Rate = updatedRate
+        };
+
+        // Act
+        var result = await _fixture.Client.UpdateAsync(updateDto);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(updatedRate, result.Entity.Rate);
+        Assert.Equal(RevisionAction.Updated, result.Revision.Action);
+    }
+
+    [Fact]
+    public async Task UpdateCurrencyRate_UsingOriginTargetKeys_UpdatesRate()
+    {
+        // Arrange
+        var originKey = Guid.NewGuid();
+        var targetKey = Guid.NewGuid();
+        var initialRate = 1.5m;
+        var updatedRate = 2.0m;
+
+        await _fixture.Client.CreateAsync(originKey, targetKey, initialRate);
+
+        // Act
+        var result = await _fixture.Client.UpdateAsync(originKey, targetKey, updatedRate);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(updatedRate, result.Entity.Rate);
+        Assert.Equal(RevisionAction.Updated, result.Revision.Action);
+    }
+
+    [Fact]
+    public async Task UpdateCurrencyRate_NonExistentConversionWithDto_ThrowsException()
+    {
+        // Arrange
+        var updateDto = new CurrencyRateEntityDto
+        {
+            OriginKey = Guid.NewGuid(),
+            TargetKey = Guid.NewGuid(),
+            Rate = 1.5m
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<RpcException>(
+            () => _fixture.Client.UpdateAsync(updateDto));
+        Assert.Equal(StatusCode.NotFound, exception.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateCurrencyRate_InvalidRateInDto_ThrowsException()
+    {
+        // Arrange
+        var originKey = Guid.NewGuid();
+        var targetKey = Guid.NewGuid();
+        var initialRate = 1.5m;
+
+        var created = await _fixture.Client.CreateAsync(originKey, targetKey, initialRate);
+
+        var updateDto = new CurrencyRateEntityDto
+        {
+            OriginKey = originKey,
+            TargetKey = targetKey,
+            Rate = -1
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<RpcException>(
+            () => _fixture.Client.UpdateAsync(created.Key, updateDto));
+        Assert.Equal(StatusCode.InvalidArgument, exception.StatusCode);
     }
 }
