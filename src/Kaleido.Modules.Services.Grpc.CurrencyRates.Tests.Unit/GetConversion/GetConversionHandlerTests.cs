@@ -1,0 +1,134 @@
+using AutoMapper;
+using Grpc.Core;
+using Kaleido.Common.Services.Grpc.Constants;
+using Kaleido.Common.Services.Grpc.Models;
+using Kaleido.Grpc.CurrencyRates;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Mappers;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Models;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Common.Validators;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.GetConversion;
+using Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Unit.Builders;
+using Moq;
+using Moq.AutoMock;
+
+namespace Kaleido.Modules.Services.Grpc.CurrencyRates.Tests.Unit.GetConversion;
+
+public class GetConversionHandlerTests
+{
+    private readonly AutoMocker _mocker;
+    private readonly GetConversionHandler _sut;
+    private readonly CurrencyConversionRequest _validRequest;
+    private readonly Guid _validOriginKey;
+    private readonly Guid _validTargetKey;
+
+    public GetConversionHandlerTests()
+    {
+        _mocker = new AutoMocker();
+        _validOriginKey = Guid.NewGuid();
+        _validTargetKey = Guid.NewGuid();
+        _validRequest = new CurrencyConversionRequestBuilder()
+            .WithOriginKey(_validOriginKey)
+            .WithTargetKey(_validTargetKey)
+            .Build();
+
+        // Happy path setup
+        _mocker.Use(new KeyValidator());
+
+        var mapper = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<CurrencyRateMappingProfile>();
+        });
+        _mocker.Use(mapper.CreateMapper());
+
+        var entityResult = new EntityLifeCycleResult<CurrencyRateEntity, BaseRevisionEntity>
+        {
+            Entity = new CurrencyRateBuilder().BuildEntity(),
+            Revision = new BaseRevisionEntity { Action = RevisionAction.Created }
+        };
+
+        _mocker.GetMock<IGetConversionManager>()
+            .Setup(m => m.GetConversionAsync(_validOriginKey, _validTargetKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ManagerResponse.Success(entityResult));
+
+        _sut = _mocker.CreateInstance<GetConversionHandler>();
+    }
+
+    [Fact]
+    public async Task HandleAsync_ValidRequest_ReturnsCurrencyRateResponse()
+    {
+        // Act
+        var result = await _sut.HandleAsync(_validRequest, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.IsType<CurrencyRateResponse>(result);
+    }
+
+    [Theory]
+    [InlineData("invalid-guid", true)]
+    [InlineData("", true)]
+    public async Task HandleAsync_InvalidOriginKey_ThrowsRpcException(string originKey, bool expectException)
+    {
+        // Arrange
+        var request = new CurrencyConversionRequestBuilder()
+            .WithOriginKey(originKey)
+            .WithTargetKey(_validTargetKey)
+            .Build();
+
+        // Act & Assert
+        if (expectException)
+        {
+            var exception = await Assert.ThrowsAsync<RpcException>(
+                () => _sut.HandleAsync(request, CancellationToken.None));
+            Assert.Equal(StatusCode.InvalidArgument, exception.Status.StatusCode);
+        }
+    }
+
+    [Theory]
+    [InlineData("invalid-guid", true)]
+    [InlineData("", true)]
+    public async Task HandleAsync_InvalidTargetKey_ThrowsRpcException(string targetKey, bool expectException)
+    {
+        // Arrange
+        var request = new CurrencyConversionRequestBuilder()
+            .WithOriginKey(_validOriginKey)
+            .WithTargetKey(targetKey)
+            .Build();
+
+        // Act & Assert
+        if (expectException)
+        {
+            var exception = await Assert.ThrowsAsync<RpcException>(
+                () => _sut.HandleAsync(request, CancellationToken.None));
+            Assert.Equal(StatusCode.InvalidArgument, exception.Status.StatusCode);
+        }
+    }
+
+    [Fact]
+    public async Task HandleAsync_ConversionNotFound_ThrowsRpcException()
+    {
+        // Arrange
+        _mocker.GetMock<IGetConversionManager>()
+            .Setup(m => m.GetConversionAsync(_validOriginKey, _validTargetKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ManagerResponse.NotFound());
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<RpcException>(
+            () => _sut.HandleAsync(_validRequest, CancellationToken.None));
+        Assert.Equal(StatusCode.NotFound, exception.Status.StatusCode);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ManagerThrowsException_ThrowsRpcException()
+    {
+        // Arrange
+        _mocker.GetMock<IGetConversionManager>()
+            .Setup(m => m.GetConversionAsync(_validOriginKey, _validTargetKey, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Exception("Test exception"));
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<RpcException>(
+            () => _sut.HandleAsync(_validRequest, CancellationToken.None));
+        Assert.Equal(StatusCode.Internal, exception.Status.StatusCode);
+    }
+}

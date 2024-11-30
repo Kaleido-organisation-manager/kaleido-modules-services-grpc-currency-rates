@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package Kaleido.Grpc.CurrencyRates;
+
+import "models.proto";
+
+service GrpcCurrencyRateService {
+    // CRUD
+    rpc CreateCurrencyRate(CurrencyRate) returns (CurrencyRateResponse);
+    rpc UpdateCurrencyRate(CurrencyRateActionRequest) returns (CurrencyRateResponse);
+    rpc DeleteCurrencyRate(CurrencyRateRequest) returns (CurrencyRateResponse);
+    rpc GetCurrencyRate(CurrencyRateRequest) returns (CurrencyRateResponse);
+    rpc GetAllCurrencyRates(EmptyRequest) returns (CurrencyRateListResponse);
+
+    // Revisions
+    rpc GetCurrencyRateRevision(CurrencyRateRevisionRequest) returns (CurrencyRateResponse);
+    rpc GetAllCurrencyRateRevisions(CurrencyRateRequest) returns (CurrencyRateListResponse);
+    
+    // Conversions
+    rpc GetAllCurrencyConversions(CurrencyRateRequest) returns (CurrencyRateListResponse);
+    rpc GetCurrencyConversion(CurrencyConversionRequest) returns (CurrencyRateResponse);
+}
